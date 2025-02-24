@@ -83,7 +83,18 @@ To ensure that every component of the guardrail system works as intended, we hav
 
 Below is a screenshot of the app’s response testing functionality, illustrating the interactive evaluation process:
 
+
+**Response Testing**
+
 ![Response Testing Screenshot](app_screenshots/response_testing1.png)
+
+![Response Testing Screenshot](app_screenshots/response_testing2.png)
+
+![Response Testing Screenshot](app_screenshots/response_testing3.png)
+
+**Bulk Testing**
+
+![Response Testing Screenshot](app_screenshots/bulk_testing1.png)
 
 *Pytest is used to run automated tests, ensuring our code remains reliable and facilitating continuous integration.*
 
