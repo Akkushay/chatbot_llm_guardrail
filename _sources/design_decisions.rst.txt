@@ -35,4 +35,4 @@ The project is divided into distinct modules:
 - **Mocking:** External API calls are mocked during testing to ensure reliability and speed.
 - **Continuous Integration:** The project is designed to integrate into CI pipelines to automatically run tests on each change.
 
-For more details, please refer to the accompanying DESIGN_DECISIONS.md file in the project root.
+For more details, please refer to the accompanying design_decisions.md file in the project root.
