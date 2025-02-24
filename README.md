@@ -2,11 +2,12 @@
 
 ## Overview
 This project provides a hybrid evaluation system for banking chatbot responses. It consists of:
-- A **synthetic data generator** for creating labeled examples.
-- A **LoRa-based classifier** fine-tuned on a banking dataset.
-- A **hybrid guardrail system** that uses a large language model (LLM) prompt to evaluate response groundedness and consistency.
-- A **Streamlit app** for interactive evaluation.
+- **Synthetic data generator** for creating labeled examples.
+- **LoRa-based classifier** fine-tuned on a banking dataset.
+- **Hybrid guardrail system** that uses a large language model (LLM) prompt to evaluate response groundedness and consistency.
+- **Streamlit app** for interactive evaluation.
 - Comprehensive documentation generated via Sphinx.
+- **Design decisions** (design_decision.md) file  with discussion around why a particular design was used 
 
 ```plaintext
 chatbot_llm_guardrail/
@@ -71,7 +72,8 @@ chatbot_llm_guardrail/
 
 
 6. **Generating Documentation with Sphinx:** Navigate to the docs/ directory and run:
-	make html
+	make html 
+	```open _build/html/index.html``` to run html file on your browser
 
 7. **Running Unit Tests: Run the tests using pytest:**
 	pytest tests/

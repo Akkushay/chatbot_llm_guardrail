@@ -1,36 +1,144 @@
-# DESIGN_DECISIONS.md
+# Design Considerations for Chatbot LLM Guardrail
 
-## Overview
-This document outlines the key design decisions made in the LLM Guardrail Evaluation Project.
+This document outlines the design considerations, solution approach, evaluation metrics, limitations, and future recommendations for our Chatbot LLM Guardrail project. It details our assumptions, choices made during development, and the rationale behind our hybrid evaluation strategy.
 
-## 1. Use of LoRa for Fine-Tuning
-- **Reasoning:** 
-  - **Efficiency:** LoRa (Low-Rank Adaptation) reduces the number of trainable parameters, enabling efficient fine-tuning on limited resources.
-  - **Preservation:** It adds lightweight adapters without overwriting the base model’s weights, preserving pretrained knowledge.
-  - **Resource Constraints:** Ideal for our binary classification task (grounded vs. ungrounded) with faster training and lower GPU memory usage.
+---
 
-## 2. Hybrid Guardrail Approach
-- **Components:**
-  - A fast, LoRa-based classifier for initial scoring.
-  - A detailed few-shot LLM prompt evaluation.
-- **Reasoning:**
-  - **Robust Evaluation:** Combining both ensures detection of unsupported claims and nuanced errors.
-  - **Prompt Engineering:** The few-shot prompt—with clear examples and strict JSON instructions—ensures consistent and parseable output.
-  - **Confidence Calibration:** Merging outputs from both models provides a more robust final decision.
+## Assumptions
 
-## 3. Prompt Engineering Optimization
-- **Structure:** 
-  - Detailed examples and clear instructions for the LLM.
-  - A focus on a strict JSON output to ease downstream processing.
-- **Testing:** 
-  - Iterative refinement and fallback mechanisms (e.g., regex fixes) were implemented to handle minor inconsistencies.
+- **RAG Chatbot Input:**  
+  We assume that the chatbot build team has developed a Retrieval-Augmented Generation (RAG) chatbot. Consequently, the inputs to our LLM-powered guardrail are:
+  - **Query:** The original user query.
+  - **Response:** The chatbot’s answer.
+  - **Retrieved Documents:** A list of documents retrieved to support the response.
 
-## 4. Testing Strategy
-- **Unit Tests:** 
-  - Comprehensive tests cover data preprocessing, model training, evaluation logic, and prompt parsing.
-  - External dependencies (e.g., API calls) are mocked to ensure reliable tests.
-- **Continuous Integration:** 
-  - It is recommended to set up CI pipelines to run these tests automatically.
+- **Guardrail Objective:**  
+  Our primary goal is to ensure that the chatbot's response is well-grounded, meaning every claim in the response should be supported by the retrieved documents.
+
+---
+
+## Data Generation and Synthetic Dataset
+
+- **Synthetic Dataset via LLM Prompting:**  
+  We generated a synthetic dataset using an LLM prompt technique. A weak LLM was employed in a few-shot learning setup to label each sample as either grounded (1) or non-grounded (0).  
+  - *Rationale:* Although external datasets were an option, generating our own allowed for better control over domain-specific examples and ensured that the synthetic data closely matched the context of our banking chatbot.
+
+---
+
+## Approach and Solution Build
+
+### Evaluating Guardrail Options
+
+- **Explored Alternatives:**  
+  We considered using existing solutions such as Guardrails AI or NeMo for guardrail evaluation. However, our objective was to test multiple techniques (e.g., prompt engineering, task breakdown, zero/one/few-shot learning, and fine-tuning) to build a contextually factual guardrail.
+
+### Hybrid Evaluation Strategy
+
+Our final solution is a hybrid approach that combines several techniques:
+
+- **Prompt Engineering & Task Breakdown:**  
+  The guardrail prompt is meticulously structured with clear examples, guiding the LLM to evaluate responses based solely on the retrieved documents.
+
+- **Multi-Prompt and Self-Check Mechanism:**  
+  We incorporate a self-check using a confidence score, which is then mathematically combined with the classifier's score.
+
+- **LoRa-based Fine-Tuning:**  
+  Given our limited dataset, we opted for an adapter-based approach using LoRa (Low-Rank Adaptation). This method trains only a small adapter (freezing most of the base model) to efficiently fine-tune the model while preserving pretrained representations.
+
+- **Binary Classification Framing:**  
+  We formulated the task as a binary classification problem where the model predicts whether a response is grounded (1) or not (0). The classifier is trained on a synthetic dataset that concatenates the chatbot response with the retrieved documents.
+
+- **Handling Class Imbalance:**  
+  We tackled class imbalance using custom training routines, class weighting, and early stopping to prevent overfitting. Diagnostic plots and CSV outputs are generated for detailed performance analysis.
+
+- **Probability Calibration:**  
+  Logistic regression is used to calibrate the classifier’s predicted probability, ensuring that the final confidence score reflects the true likelihood of a grounded response.
+
+- **Mathematical Combination:**  
+  A mathematical formula combines the LoRa classifier’s score with the confidence score from the LLM evaluation, resulting in a final groundedness score.
+
+---
+
+## Streamlit Application
+
+- **Showcasing the Guardrail:**  
+  To make the capabilities of the LLM-powered guardrail accessible to non-technical users, we built a Streamlit application.
+
+- **User-Friendly Interface:**  
+  The app is designed with two tabs:
+  - **Manual Testing Tab:**  
+    Allows users to input a chatbot response and view the corresponding retrieved documents. This interactive interface enables users to experiment with different responses and observe how the guardrail evaluates their groundedness.
+  
+  - **Bulk Testing Tab:**  
+    In this mode, the model evaluates multiple data points from the `INFERENCE_DATA_FILE`. Currently, the file contains 5 samples due to API rate limit constraints, but it can be replaced with a larger dataset if needed.
+
+- **Objective:**  
+  The Streamlit app demonstrates that our guardrail not only functions correctly but also provides an intuitive, user-friendly way to interact with the system—making advanced AI products accessible to a broader audience.
+
+---
+
+## Testing and Validation
+
+To ensure that every component of the guardrail system works as intended, we have developed a comprehensive suite of unit tests using Pytest. The tests cover data preprocessing, model training, evaluation logic, and API interactions.
+
+Below is a screenshot of the app’s response testing functionality, illustrating the interactive evaluation process:
+
+![Response Testing Screenshot](app_screenshots/response_testing1.png)
+
+*Pytest is used to run automated tests, ensuring our code remains reliable and facilitating continuous integration.*
+
+---
+
+## Evaluation Metrics
+
+We used multiple evaluation methods to assess the performance of both the classifier and the overall guardrail system:
+
+- **Classifier Evaluation:**
+  - **ROC Curve & AUCPR:** To measure discriminative ability.
+  - **Confusion Matrix:** To analyze classification errors.
+
+- **Model Evaluation:**
+  - **Precision, Recall, F1, and Accuracy:** Standard metrics for performance.
+  - **Confidence Score Analysis:** To validate the self-check mechanism.
+  - **Qualitative Metrics (e.g., METEOR):** For evaluating response quality.
+
+- **Note:**  
+  We opted not to use RAGAs since the guardrail itself is LLM-powered, making an additional evaluation layer unnecessary.
+
+---
+
+## Limitations
+
+- **LLM Variability:**  
+  The LLM-based approach may produce imperfect outputs, leading to occasional inaccuracies in the groundedness score and self-check mechanism.
+  
+- **Data Scarcity:**  
+  LoRa fine-tuning was performed on a small synthetic dataset. More data would likely improve the model's performance.
+
+- **Concept and Data Drift:**  
+  The classifier may suffer from concept drift in a dynamic environment, affecting long-term accuracy.
+
+- **Cost Implications:**  
+  LLM API usage can be costly depending on the number of API calls and the specific LLM used.
+
+---
+
+## Future Recommendations
+
+- **Data Expansion:**  
+  Acquire more real-world data to further fine-tune and validate the classifier.
+
+- **Iterative Feedback:**  
+  Implement continuous feedback mechanisms to identify misclassifications and iteratively improve the model via prompt refinement or additional training.
+
+- **Enhanced Guardrail Approaches:**  
+  Consider using router or agent-based methods to further enhance the guardrail’s groundedness evaluation.
+
+- **Broader Evaluation Metrics:**  
+  Explore additional qualitative and quantitative metrics, including human-in-the-loop evaluations, to further validate and improve the system.
+
+---
 
 ## Conclusion
-This design optimizes for efficiency, clarity, and robustness. The project is modular and well tested, enabling easy extension and maintenance.
+
+Our hybrid approach, which leverages prompt engineering, LoRa-based fine-tuning, and synthetic data generation, forms a robust guardrail to ensure chatbot responses are well-grounded. While there are inherent limitations—such as the reliance on synthetic data and potential LLM inaccuracies—this design provides a solid foundation for future enhancements, making advanced AI products both powerful and user-friendly.
