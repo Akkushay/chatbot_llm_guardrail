@@ -7,7 +7,7 @@ This project provides a hybrid evaluation system for banking chatbot responses. 
 - **Hybrid guardrail system** that uses a large language model (LLM) prompt to evaluate response groundedness and consistency.
 - **Streamlit app** for interactive evaluation.
 - Comprehensive documentation generated via Sphinx.
-- **Design decisions** [Design Decisions](DESIGN_DECISIONS.md) file  with discussion around why a particular design was used 
+- **Design decisions** [Design Decisions](DESIGN_DECISIONS.md) contains discussions on design.
 
 ```plaintext
 chatbot_llm_guardrail/
@@ -105,4 +105,4 @@ SOFTWARE.
 
 
 ## Additional Information
-For detailed design decisions, refer to DESIGN_DECISIONS.md.
+For detailed design decisions, refer to [Design Decisions](DESIGN_DECISIONS.md)

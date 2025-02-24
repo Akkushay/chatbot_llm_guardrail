@@ -84,17 +84,35 @@ To ensure that every component of the guardrail system works as intended, we hav
 Below is a screenshot of the app’s response testing functionality, illustrating the interactive evaluation process:
 
 
-**Response Testing**
+## Response Testing
 
-![Response Testing Screenshot](app_screenshots/response_testing1.png)
+Testing different types of responses, including changing numbers, adding competitor name, giving grounded response etc. 
 
-![Response Testing Screenshot](app_screenshots/response_testing2.png)
+  #### 1. Competitor:
+![Response Testing Screenshot](app_screenshots/ResponseTest1.png)
 
-![Response Testing Screenshot](app_screenshots/response_testing3.png)
 
-**Bulk Testing**
+  #### 2. Grounded:
+![Response Testing Screenshot](app_screenshots/ResponseTest2.png)
 
-![Response Testing Screenshot](app_screenshots/bulk_testing1.png)
+
+  #### 3. Incorrect Number:
+![Response Testing Screenshot](app_screenshots/ResponseTest3.png)
+
+
+  #### 4. Off topic:
+![Response Testing Screenshot](app_screenshots/ResponseTest4.png)
+
+
+## Bulk Testing
+
+![Response Testing Screenshot](app_screenshots/BulkTesting1.png)
+
+
+## Design Decisions
+
+![Response Testing Screenshot](app_screenshots/DesignDecisions.png)
+
 
 *Pytest is used to run automated tests, ensuring our code remains reliable and facilitating continuous integration.*
 
@@ -111,7 +129,7 @@ We used multiple evaluation methods to assess the performance of both the classi
 - **Model Evaluation:**
   - **Precision, Recall, F1, and Accuracy:** Standard metrics for performance.
   - **Confidence Score Analysis:** To validate the self-check mechanism.
-  - **Qualitative Metrics (e.g., METEOR):** For evaluating response quality.
+  - **Qualitative Metrics (e.g., METEOR, ROUGE-L F1, BERTScore):** For evaluating response quality. These metric do show the superiority of LLM understanding over n gram evaluations. 
 
 - **Note:**  
   We opted not to use RAGAs since the guardrail itself is LLM-powered, making an additional evaluation layer unnecessary.
