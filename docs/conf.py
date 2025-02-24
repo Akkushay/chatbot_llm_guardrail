@@ -18,3 +18,4 @@ exclude_patterns = []
 # Use the Read the Docs theme for a modern look.
 html_theme = 'sphinx_rtd_theme'
 html_static_path = ['_static']
+html_baseurl = "https://github.com/Akkushay/chatbot_llm_guardrail.git/"
