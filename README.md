@@ -8,7 +8,7 @@ This project provides a hybrid evaluation system for banking chatbot responses. 
 - A **Streamlit app** for interactive evaluation.
 - Comprehensive documentation generated via Sphinx.
 
-## Project Structure
+```plaintext
 chatbot_llm_guardrail/
 ├── README.md
 ├── requirements.txt
@@ -41,6 +41,7 @@ chatbot_llm_guardrail/
     ├── conf.py
     ├── index.rst
     └── modules.rst
+```
 
 
 
