@@ -1,0 +1,159 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Design Decisions &mdash; Chatbot LLM Guardrail 1.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=f2a433a1"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="prev" title="Project Modules" href="modules.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            Chatbot LLM Guardrail
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="usage.html">Usage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules.html">Project Modules</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Design Decisions</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#modular-architecture"><strong>Modular Architecture</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#why-use-lora-for-fine-tuning"><strong>Why Use LoRa for Fine-Tuning?</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#hybrid-evaluation-approach"><strong>Hybrid Evaluation Approach</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#prompt-engineering"><strong>Prompt Engineering</strong></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#testing-strategy"><strong>Testing Strategy</strong></a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">Chatbot LLM Guardrail</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Design Decisions</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/design_decisions.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="design-decisions">
+<h1>Design Decisions<a class="headerlink" href="#design-decisions" title="Link to this heading"></a></h1>
+<p>This document explains the key design choices for the Chatbot LLM Guardrail project.</p>
+<section id="modular-architecture">
+<h2><strong>Modular Architecture</strong><a class="headerlink" href="#modular-architecture" title="Link to this heading"></a></h2>
+<p>The project is divided into distinct modules:
+- <strong>Data Module:</strong> Contains synthetic data generation utilities.
+- <strong>Model Module:</strong> Handles model training, data preprocessing, and custom training routines using LoRa.
+- <strong>Evaluation Module:</strong> Implements the guardrail evaluation logic, combining classifier inference with a few-shot LLM prompt.
+- <strong>App Module:</strong> Provides an interactive Streamlit interface for testing and evaluation.</p>
+</section>
+<section id="why-use-lora-for-fine-tuning">
+<h2><strong>Why Use LoRa for Fine-Tuning?</strong><a class="headerlink" href="#why-use-lora-for-fine-tuning" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Efficiency:</strong> LoRa reduces the number of trainable parameters, making fine-tuning faster and less resource-intensive.</p></li>
+<li><p><strong>Preservation:</strong> It retains most of the pretrained model’s weights, ensuring that valuable pre-learned representations are maintained.</p></li>
+<li><p><strong>Scalability:</strong> This approach is ideal for tasks with limited data, as it efficiently adapts the model for binary classification tasks (grounded vs. ungrounded).</p></li>
+</ul>
+</section>
+<section id="hybrid-evaluation-approach">
+<h2><strong>Hybrid Evaluation Approach</strong><a class="headerlink" href="#hybrid-evaluation-approach" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Classifier Inference:</strong> A lightweight LoRa-based classifier provides an initial, fast evaluation.</p></li>
+<li><p><strong>Few-shot LLM Prompt:</strong> A structured prompt with clear examples is used to perform a detailed evaluation.</p></li>
+<li><p><strong>Calibration:</strong> Outputs from both components are combined to produce a final evaluation score, ensuring robustness.</p></li>
+</ul>
+</section>
+<section id="prompt-engineering">
+<h2><strong>Prompt Engineering</strong><a class="headerlink" href="#prompt-engineering" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Structured Prompt:</strong> The prompt includes explicit examples and instructions to generate valid JSON, reducing output errors.</p></li>
+<li><p><strong>Error Handling:</strong> The code contains mechanisms (e.g., regex fixes) to correct common JSON formatting issues.</p></li>
+<li><p><strong>Iterative Refinement:</strong> The prompt was tuned through testing to optimize clarity and performance.</p></li>
+</ul>
+</section>
+<section id="testing-strategy">
+<h2><strong>Testing Strategy</strong><a class="headerlink" href="#testing-strategy" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p><strong>Unit Tests:</strong> Comprehensive tests cover data preprocessing, training routines, evaluation logic, and API interactions.</p></li>
+<li><p><strong>Mocking:</strong> External API calls are mocked during testing to ensure reliability and speed.</p></li>
+<li><p><strong>Continuous Integration:</strong> The project is designed to integrate into CI pipelines to automatically run tests on each change.</p></li>
+</ul>
+<p>For more details, please refer to the accompanying DESIGN_DECISIONS.md file in the project root.</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules.html" class="btn btn-neutral float-left" title="Project Modules" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright .</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
